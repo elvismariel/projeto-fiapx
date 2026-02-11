@@ -9,6 +9,8 @@ import (
 	outbound_storage "video-processor/internal/adapters/outbound/storage"
 	core_services "video-processor/internal/core/services"
 
+	ginprometheus "github.com/zsais/go-gin-prometheus"
+
 	"context"
 	"os"
 
@@ -84,6 +86,10 @@ func main() {
 	handler := inbound_http.NewHandler(videoService, userService, storage, jwtSecret)
 
 	r := gin.Default()
+
+	// Prometheus Metrics
+	p := ginprometheus.NewPrometheus("gin")
+	p.Use(r)
 
 	// Middleware
 	r.Use(func(c *gin.Context) {
