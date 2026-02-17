@@ -27,8 +27,9 @@ func NewVideoService(s ports.Storage, r ports.VideoRepository, p ports.EventPubl
 func (s *videoService) UploadAndProcess(userID int64, filename string, file io.Reader) (domain.ProcessingResult, error) {
 	if !s.isValidVideoFile(filename) {
 		return domain.ProcessingResult{
-			Success: false,
-			Message: "Formato de arquivo não suportado. Use: mp4, avi, mov, mkv",
+			Success:   false,
+			Message:   "Formato de arquivo não suportado. Use: mp4, avi, mov, mkv",
+			ErrorCode: "ERR_INVALID_FORMAT",
 		}, nil
 	}
 
@@ -38,7 +39,11 @@ func (s *videoService) UploadAndProcess(userID int64, filename string, file io.R
 
 	videoPath, err := s.storage.SaveUpload(uniqueFilename, file)
 	if err != nil {
-		return domain.ProcessingResult{Success: false, Message: "Erro ao salvar arquivo: " + err.Error()}, err
+		return domain.ProcessingResult{
+			Success:   false,
+			Message:   "Erro ao salvar arquivo: " + err.Error(),
+			ErrorCode: "ERR_STORAGE_FAIL",
+		}, err
 	}
 
 	video := &domain.Video{
@@ -50,7 +55,11 @@ func (s *videoService) UploadAndProcess(userID int64, filename string, file io.R
 	err = s.repo.Create(video)
 	if err != nil {
 		s.storage.DeleteFile(videoPath)
-		return domain.ProcessingResult{Success: false, Message: "Erro ao criar registro no banco: " + err.Error()}, err
+		return domain.ProcessingResult{
+			Success:   false,
+			Message:   "Erro ao criar registro no banco: " + err.Error(),
+			ErrorCode: "ERR_DB_FAIL",
+		}, err
 	}
 
 	// Publish NATS event

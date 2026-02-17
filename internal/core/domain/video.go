@@ -24,6 +24,7 @@ type Video struct {
 type ProcessingResult struct {
 	Success    bool     `json:"success"`
 	Message    string   `json:"message"`
+	ErrorCode  string   `json:"error_code,omitempty"`
 	VideoID    int64    `json:"video_id,omitempty"`
 	ZipPath    string   `json:"zip_path,omitempty"`
 	FrameCount int      `json:"frame_count,omitempty"`
@@ -50,6 +51,7 @@ type FileListResponse struct {
 }
 
 type ErrorResponse struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
+	Success   bool   `json:"success"`
+	Message   string `json:"message"`
+	ErrorCode string `json:"error_code,omitempty"`
 }
